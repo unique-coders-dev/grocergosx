@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "16491473707",
+    "project_id": "grocergosx---app",
+    "storage_bucket": "grocergosx---app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:16491473707:android:6f1c889200f7540f26336e",
+        "android_client_info": {
+          "package_name": "com.grocergosx.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEMuZAU2SQbHE4qMx9mTuJP0dcXL_91qY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

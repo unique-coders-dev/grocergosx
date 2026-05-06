@@ -1,0 +1,32 @@
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import { GroceryHomeScreen } from '../screens/customer/grocery/GroceryHomeScreen';
+import { ProductDetailScreen } from '../screens/customer/grocery/ProductDetailScreen';
+import { CartScreen } from '../screens/customer/grocery/CartScreen';
+import { CheckoutScreen } from '../screens/customer/grocery/CheckoutScreen';
+import { OrderConfirmationScreen } from '../screens/customer/grocery/OrderConfirmationScreen';
+import { LaundryHomeScreen } from '../screens/customer/laundry/LaundryHomeScreen';
+import { LaundryScheduleScreen } from '../screens/customer/laundry/LaundryScheduleScreen';
+import { ParcelHomeScreen } from '../screens/customer/parcel/ParcelHomeScreen';
+import { ParcelBookingScreen } from '../screens/customer/parcel/ParcelBookingScreen';
+import { PreArrivalStockingScreen } from '../screens/customer/services/PreArrivalStockingScreen';
+import { PlaceholderScreen } from '../screens/PlaceholderScreen';
+
+const Stack = createStackNavigator();
+
+export const HomeStackNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="GroceryHome" component={GroceryHomeScreen} />
+      <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+      <Stack.Screen name="Cart" component={CartScreen} />
+      <Stack.Screen name="Checkout" component={CheckoutScreen} />
+      <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
+      <Stack.Screen name="LaundryHome" component={LaundryHomeScreen} />
+      <Stack.Screen name="LaundrySchedule" component={LaundryScheduleScreen} />
+      <Stack.Screen name="ParcelHome" component={ParcelHomeScreen} />
+      <Stack.Screen name="ParcelBooking" component={ParcelBookingScreen} />
+      <Stack.Screen name="PreArrival" component={PreArrivalStockingScreen} />
+    </Stack.Navigator>
+  );
+};
