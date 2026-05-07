@@ -7,14 +7,18 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
-import { Text, Button, TextInput, SegmentedButtons, HelperText } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import { colors } from '../../../config/theme';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { colors, shadows } from '../../../config/theme';
+import { Card, Button, Input, Badge } from '../../../components/common/UI';
+import { ServicePageHeader } from '../../../components/common/ServiceComponents';
 
 const parcelSchema = z.object({
   senderAddress: z.string().min(5, 'Required'),
@@ -44,7 +48,7 @@ export const ParcelBookingScreen = ({ navigation }: any) => {
   } = useForm<ParcelFormData>({
     resolver: zodResolver(parcelSchema),
     defaultValues: {
-      senderAddress: 'My Villa, St. Maarten', // Mocking auto-fill
+      senderAddress: 'Simpson Bay, Yacht Club',
       recipientName: '',
       recipientPhone: '',
       recipientAddress: '',
@@ -55,8 +59,6 @@ export const ParcelBookingScreen = ({ navigation }: any) => {
   const onSubmit = async (data: ParcelFormData) => {
     setLoading(true);
     try {
-      // In a real app, Stripe payment happens here
-      
       const orderData = {
         type: 'parcel',
         customerId: auth().currentUser?.uid,
@@ -75,8 +77,6 @@ export const ParcelBookingScreen = ({ navigation }: any) => {
       };
 
       const docRef = await firestore().collection('parcel_deliveries').add(orderData);
-      
-      // Also add to unified orders
       await firestore().collection('orders').doc(docRef.id).set({
         ...orderData,
         orderId: docRef.id,
@@ -92,145 +92,135 @@ export const ParcelBookingScreen = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ServicePageHeader navigation={navigation} title="Booking" />
+      
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Text variant="headlineSmall" style={styles.title}>Parcel Details</Text>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View entering={FadeInDown.duration(600)}>
+            <Text style={styles.title}>Parcel Details</Text>
+            <Text style={styles.subtitle}>Tell us about your package and destination</Text>
+          </Animated.View>
 
           <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.label}>Sender Info</Text>
+            <Text style={styles.label}>Sender Information</Text>
             <Controller
               control={control}
               name="senderAddress"
-              render={({ field: { onChange, value, onBlur } }) => (
-                <TextInput
-                  label="Pickup Address"
-                  mode="outlined"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  icon="map-marker-outline"
+                  placeholder="Pickup Address"
                   value={value}
                   onChangeText={onChange}
-                  onBlur={onBlur}
-                  style={styles.input}
+                  error={errors.senderAddress}
                 />
               )}
             />
           </View>
 
           <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.label}>Recipient Info</Text>
+            <Text style={styles.label}>Recipient Information</Text>
             <Controller
               control={control}
               name="recipientName"
-              render={({ field: { onChange, value, onBlur } }) => (
-                <TextInput
-                  label="Name"
-                  mode="outlined"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  icon="account-outline"
+                  placeholder="Recipient Name"
                   value={value}
                   onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={!!errors.recipientName}
-                  style={styles.input}
+                  error={errors.recipientName}
                 />
               )}
             />
+            <View style={{ height: 12 }} />
             <Controller
               control={control}
               name="recipientPhone"
-              render={({ field: { onChange, value, onBlur } }) => (
-                <TextInput
-                  label="Phone"
-                  mode="outlined"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  icon="phone-outline"
+                  placeholder="Recipient Phone"
                   value={value}
                   onChangeText={onChange}
-                  onBlur={onBlur}
                   keyboardType="phone-pad"
-                  error={!!errors.recipientPhone}
-                  style={styles.input}
+                  error={errors.recipientPhone}
                 />
               )}
             />
+            <View style={{ height: 12 }} />
             <Controller
               control={control}
               name="recipientAddress"
-              render={({ field: { onChange, value, onBlur } }) => (
-                <TextInput
-                  label="Delivery Address"
-                  mode="outlined"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  icon="map-marker-check-outline"
+                  placeholder="Delivery Address"
                   value={value}
                   onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={!!errors.recipientAddress}
-                  style={styles.input}
+                  error={errors.recipientAddress}
                 />
               )}
             />
           </View>
 
           <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.label}>Parcel Size</Text>
-            <SegmentedButtons
-              value={parcelSize}
-              onValueChange={setParcelSize}
-              buttons={[
-                { value: 'Small', label: 'Small' },
-                { value: 'Medium', label: 'Medium' },
-                { value: 'Large', label: 'Large' },
-              ]}
-              style={styles.segmented}
-            />
+            <Text style={styles.label}>Parcel Size</Text>
+            <View style={styles.selectionRow}>
+              {['Small', 'Medium', 'Large'].map((size) => (
+                <TouchableOpacity 
+                  key={size}
+                  style={[styles.selectionCard, parcelSize === size && styles.activeSelection]}
+                  onPress={() => setParcelSize(size)}
+                >
+                  <Text style={[styles.selectionText, parcelSize === size && styles.activeSelectionText]}>{size}</Text>
+                  <Text style={[styles.selectionPrice, parcelSize === size && styles.activeSelectionText]}>${sizePrices[size]}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.label}>Pickup Time Slot</Text>
-            <SegmentedButtons
-              value={timeSlot}
-              onValueChange={setTimeSlot}
-              buttons={[
-                { value: 'morning', label: '8-12' },
-                { value: 'afternoon', label: '12-5' },
-                { value: 'evening', label: '5-8' },
-              ]}
-              style={styles.segmented}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.label}>Notes / Special Handling</Text>
+            <Text style={styles.label}>Notes</Text>
             <Controller
               control={control}
               name="notes"
-              render={({ field: { onChange, value, onBlur } }) => (
-                <TextInput
-                  mode="outlined"
-                  placeholder="e.g. fragile, beware of dog"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  icon="note-text-outline"
+                  placeholder="Fragile, beware of dog, etc."
                   value={value}
                   onChangeText={onChange}
-                  onBlur={onBlur}
                   multiline
-                  numberOfLines={3}
-                  style={styles.input}
+                  style={{ height: 100, alignItems: 'flex-start', paddingTop: 12 }}
                 />
               )}
             />
           </View>
+          <View style={{ height: 100 }} />
         </ScrollView>
 
-        <View style={styles.footer}>
-          <View style={styles.priceRow}>
-            <Text variant="titleLarge">Total: ${sizePrices[parcelSize].toFixed(2)}</Text>
+        <Card style={styles.footer}>
+          <View style={styles.priceContainer}>
+            <View>
+              <Text style={styles.priceLabel}>Total Price</Text>
+              <Text style={styles.priceValue}>${sizePrices[parcelSize].toFixed(2)}</Text>
+            </View>
+            <Button
+              title="Book Delivery"
+              onPress={handleSubmit(onSubmit)}
+              loading={loading}
+              disabled={loading}
+              style={{ flex: 1, marginLeft: 24 }}
+            />
           </View>
-          <Button
-            mode="contained"
-            onPress={handleSubmit(onSubmit)}
-            loading={loading}
-            disabled={loading}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-          >
-            Pay & Book Now
-          </Button>
-        </View>
+        </Card>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -239,49 +229,91 @@ export const ParcelBookingScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: colors.white,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 150,
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 40,
   },
   title: {
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.dark,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: colors.gray,
+    marginTop: 4,
     marginBottom: 24,
   },
   section: {
     marginBottom: 24,
   },
   label: {
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.dark,
     marginBottom: 12,
   },
-  input: {
-    marginBottom: 12,
+  selectionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  selectionCard: {
+    flex: 1,
+    height: 80,
     backgroundColor: colors.surface,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: colors.grayLighter,
   },
-  segmented: {
+  activeSelection: {
+    backgroundColor: colors.dark,
+    borderColor: colors.dark,
+    ...shadows.medium,
+  },
+  selectionText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.gray,
+  },
+  selectionPrice: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: colors.dark,
     marginTop: 4,
   },
+  activeSelectionText: {
+    color: colors.white,
+  },
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    padding: 20,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    padding: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    borderWidth: 0,
+    backgroundColor: colors.white,
+    ...shadows.premium,
   },
-  priceRow: {
-    marginBottom: 15,
+  priceContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  button: {
-    borderRadius: 12,
-    backgroundColor: colors.primary,
+  priceLabel: {
+    fontSize: 12,
+    color: colors.gray,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
-  buttonContent: {
-    height: 56,
+  priceValue: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: colors.dark,
   },
 });

@@ -7,13 +7,14 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+import auth, { getAuth, createUserWithEmailAndPassword, updateProfile } from '@react-native-firebase/auth';
+import { getFirestore, doc, setDoc, serverTimestamp } from '@react-native-firebase/firestore';
 import { colors } from '../../config/theme';
 
 const registerSchema = z.object({
@@ -69,8 +70,12 @@ export const RegisterScreen = ({ navigation }: any) => {
     setLoading(true);
     setError(null);
     try {
+      const firebaseAuth = getAuth();
+      const db = getFirestore();
+
       // Step 1: Create Firebase Auth user
-      const userCredential = await auth().createUserWithEmailAndPassword(
+      const userCredential = await createUserWithEmailAndPassword(
+        firebaseAuth,
         data.email.trim(),
         data.password
       );
@@ -78,18 +83,19 @@ export const RegisterScreen = ({ navigation }: any) => {
 
       // Step 2: Update display name (non-blocking)
       try {
-        await userCredential.user.updateProfile({ displayName: data.name });
+        await updateProfile(userCredential.user, { displayName: data.name });
       } catch (profileErr) {
         console.warn('Could not set display name:', profileErr);
       }
 
-      // Step 3: Write Firestore profile (non-blocking - useAuth handles fallback)
+      // Step 3: Write Firestore profile
       const referralCode =
         data.name.substring(0, 3).toUpperCase() +
         Math.floor(1000 + Math.random() * 9000);
 
       try {
-        await firestore().collection('users').doc(uid).set({
+        const userRef = doc(db, 'users', uid);
+        await setDoc(userRef, {
           uid,
           name: data.name,
           email: data.email.trim(),
@@ -97,20 +103,18 @@ export const RegisterScreen = ({ navigation }: any) => {
           role: 'customer',
           loyaltyPoints: 0,
           referralCode,
-          createdAt: firestore.FieldValue.serverTimestamp(),
+          createdAt: serverTimestamp(),
         });
       } catch (firestoreErr: any) {
-        // Log Firestore error but don't block login — useAuth will create fallback profile
-        console.error('Firestore write error code:', firestoreErr?.code);
-        console.error('Firestore write error msg:', firestoreErr?.message);
+        console.error('Firestore write error:', firestoreErr);
+        setError(`Profile creation failed: ${firestoreErr?.message || 'Database error'}. Please try logging in.`);
+        return; // Stop here if database write fails during registration
       }
 
       // Auth succeeded — onAuthStateChanged in useAuth.ts will handle navigation
     } catch (authErr: any) {
       // Auth failed — show error to user
-      console.error('Auth error code:', authErr?.code);
-      console.error('Auth error message:', authErr?.message);
-      console.error('Auth error userInfo:', JSON.stringify(authErr?.userInfo));
+      console.error('Auth error detail:', authErr);
       const code = authErr?.code || authErr?.userInfo?.code || '';
       setError(getFirebaseErrorMessage(code));
     } finally {
@@ -126,6 +130,11 @@ export const RegisterScreen = ({ navigation }: any) => {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
+            <Image 
+              source={require('../../assets/logos/logo_full.png')} 
+              style={styles.logo} 
+              resizeMode="contain"
+            />
             <Text variant="displaySmall" style={styles.title}>
               Create Account
             </Text>
@@ -290,6 +299,12 @@ const styles = StyleSheet.create({
   header: {
     marginTop: 20,
     marginBottom: 30,
+    alignItems: 'center',
+  },
+  logo: {
+    height: 60,
+    width: 200,
+    marginBottom: 20,
   },
   title: {
     fontWeight: '700',

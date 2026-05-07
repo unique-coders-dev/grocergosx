@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { colors } from '../config/theme';
+import { colors, shadows } from '../config/theme';
 
 import { HomeStackNavigator } from './HomeStackNavigator';
 
@@ -20,15 +20,35 @@ export const CustomerNavigator = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName = 'home';
-          if (route.name === 'OrdersTab') iconName = 'clipboard-text';
+          let iconName = 'home-variant';
+          if (route.name === 'OrdersTab') iconName = 'shopping-outline';
           else if (route.name === 'ServicesTab') iconName = 'apps';
-          else if (route.name === 'LoyaltyTab') iconName = 'star';
-          else if (route.name === 'ProfileTab') iconName = 'account';
-          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+          else if (route.name === 'ProfileTab') iconName = 'account-outline';
+          
+          if (focused) {
+            iconName = iconName.replace('-outline', '');
+            if (iconName === 'home-variant') iconName = 'home-variant';
+            if (iconName === 'apps') iconName = 'apps';
+          }
+
+          return <MaterialCommunityIcons name={iconName} size={28} color={color} />;
         },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: 'gray',
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: colors.dark,
+        tabBarInactiveTintColor: colors.grayLight,
+        tabBarStyle: {
+          height: 80,
+          paddingTop: 10,
+          borderTopWidth: 0,
+          backgroundColor: 'white',
+          ...shadows.premium,
+          borderTopLeftRadius: 32,
+          borderTopRightRadius: 32,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+        },
         headerShown: false,
       })}
     >
@@ -40,11 +60,19 @@ export const CustomerNavigator = () => {
       <Tab.Screen 
         name="OrdersTab" 
         component={CustomerOrderListScreen} 
-        options={{ tabBarLabel: 'Orders' }} 
+        options={{ tabBarLabel: 'My Orders' }} 
       />
-      <Tab.Screen name="ServicesTab" component={ServicesScreen} options={{ tabBarLabel: 'Services' }} />
-      <Tab.Screen name="LoyaltyTab" component={LoyaltyStackNavigator} options={{ tabBarLabel: 'Loyalty' }} />
-      <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: 'Profile' }} />
+      <Tab.Screen 
+        name="ServicesTab" 
+        component={ServicesScreen} 
+        options={{ 
+          tabBarLabel: 'Services',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="apps" color={color} size={size} />
+          ),
+        }} 
+      />
+      <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: 'Account' }} />
     </Tab.Navigator>
   );
 };

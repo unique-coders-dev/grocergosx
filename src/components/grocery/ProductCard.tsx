@@ -1,10 +1,12 @@
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Card, Text, Button, IconButton } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Product } from '../../types';
-import { colors } from '../../config/theme';
+import { colors, shadows } from '../../config/theme';
 import { useCartStore } from '../../store/cartStore';
+import { Card } from '../common/UI';
 
 interface ProductCardProps {
   product: Product;
@@ -15,72 +17,91 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
   const addItem = useCartStore((state) => state.addItem);
 
   return (
-    <Card style={styles.card} onPress={onPress}>
-      <FastImage
-        source={{ uri: product.imageUrl }}
-        style={styles.image}
-        resizeMode={FastImage.resizeMode.cover}
-      />
-      <Card.Content style={styles.content}>
-        <Text variant="titleMedium" numberOfLines={1} style={styles.name}>
-          {product.name}
-        </Text>
-        <Text variant="bodySmall" style={styles.unit}>
-          {product.unit}
-        </Text>
-        <View style={styles.footer}>
-          <Text variant="titleLarge" style={styles.price}>
-            ${product.price.toFixed(2)}
-          </Text>
-          <IconButton
-            icon="plus"
-            mode="contained"
-            containerColor={colors.primary}
-            iconColor="white"
-            size={20}
-            onPress={() => addItem(product)}
-            style={styles.addButton}
+    <TouchableOpacity 
+      activeOpacity={0.9} 
+      style={styles.container} 
+      onPress={onPress}
+    >
+      <Card style={styles.card}>
+        <View style={styles.imageContainer}>
+          <FastImage
+            source={{ uri: product.imageUrl }}
+            style={styles.image}
+            resizeMode={FastImage.resizeMode.cover}
           />
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => {
+              addItem(product);
+            }}
+          >
+            <MaterialCommunityIcons name="plus" size={20} color={colors.white} />
+          </TouchableOpacity>
         </View>
-      </Card.Content>
-    </Card>
+        
+        <View style={styles.content}>
+          <Text style={styles.price}>${product.price.toFixed(2)}</Text>
+          <Text numberOfLines={1} style={styles.name}>
+            {product.name}
+          </Text>
+          <Text style={styles.unit}>
+            {product.unit}
+          </Text>
+        </View>
+      </Card>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    marginBottom: 20,
+  },
   card: {
-    flex: 1,
-    margin: 8,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    elevation: 2,
+    padding: 0,
     overflow: 'hidden',
+    borderWidth: 0,
+    ...shadows.soft,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 140,
+    position: 'relative',
   },
   image: {
     width: '100%',
-    height: 120,
-  },
-  content: {
-    padding: 8,
-  },
-  name: {
-    fontWeight: '600',
-    color: colors.textPrimary,
-  },
-  unit: {
-    color: colors.textSecondary,
-    marginBottom: 8,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  price: {
-    fontWeight: '700',
-    color: colors.primary,
+    height: '100%',
+    backgroundColor: colors.surface,
   },
   addButton: {
-    margin: 0,
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: colors.dark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...shadows.medium,
+  },
+  content: {
+    padding: 12,
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: colors.primary,
+    marginBottom: 2,
+  },
+  name: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.dark,
+  },
+  unit: {
+    fontSize: 12,
+    color: colors.gray,
+    marginTop: 2,
   },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { HomeScreen } from '../screens/customer/home/HomeScreen';
 import { GroceryHomeScreen } from '../screens/customer/grocery/GroceryHomeScreen';
 import { ProductDetailScreen } from '../screens/customer/grocery/ProductDetailScreen';
 import { CartScreen } from '../screens/customer/grocery/CartScreen';
@@ -10,13 +11,15 @@ import { LaundryScheduleScreen } from '../screens/customer/laundry/LaundrySchedu
 import { ParcelHomeScreen } from '../screens/customer/parcel/ParcelHomeScreen';
 import { ParcelBookingScreen } from '../screens/customer/parcel/ParcelBookingScreen';
 import { PreArrivalStockingScreen } from '../screens/customer/services/PreArrivalStockingScreen';
+import { NotificationScreen } from '../screens/customer/notifications/NotificationScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 
 const Stack = createStackNavigator();
 
 export const HomeStackNavigator = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Home">
+      <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="GroceryHome" component={GroceryHomeScreen} />
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
@@ -27,6 +30,7 @@ export const HomeStackNavigator = () => {
       <Stack.Screen name="ParcelHome" component={ParcelHomeScreen} />
       <Stack.Screen name="ParcelBooking" component={ParcelBookingScreen} />
       <Stack.Screen name="PreArrival" component={PreArrivalStockingScreen} />
+      <Stack.Screen name="Notifications" component={NotificationScreen} />
     </Stack.Navigator>
   );
 };

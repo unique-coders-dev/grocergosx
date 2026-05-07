@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+import { getAuth, onAuthStateChanged } from '@react-native-firebase/auth';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  serverTimestamp 
+} from '@react-native-firebase/firestore';
 import { useAuthStore } from '../store/authStore';
 import { User } from '../types';
 
@@ -8,25 +15,29 @@ export const useAuth = () => {
   const { setUser, setLoading } = useAuthStore();
 
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
+    const auth = getAuth();
+    const db = getFirestore();
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          let userDoc = await firestore()
-            .collection('users')
-            .doc(firebaseUser.uid)
-            .get();
+          let userDoc;
+          try {
+            const userRef = doc(db, 'users', firebaseUser.uid);
+            userDoc = await getDoc(userRef);
 
-          // Handle race condition: Firestore write may not be complete
-          // immediately after Firebase Auth creates the account.
-          if (!userDoc.exists) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            userDoc = await firestore()
-              .collection('users')
-              .doc(firebaseUser.uid)
-              .get();
+            // Handle race condition: Firestore write may not be complete
+            // immediately after Firebase Auth creates the account.
+            if (!userDoc.exists) {
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+              userDoc = await getDoc(userRef);
+            }
+          } catch (fetchError) {
+            console.error('Error fetching user profile from Firestore:', fetchError);
+            // Continue with fallback instead of failing
           }
 
-          if (userDoc.exists) {
+          if (userDoc?.exists) {
             setUser({
               uid: firebaseUser.uid,
               ...userDoc.data(),
@@ -43,17 +54,22 @@ export const useAuth = () => {
               referralCode:
                 (firebaseUser.email?.substring(0, 3) ?? 'USR').toUpperCase() +
                 Math.floor(1000 + Math.random() * 9000),
-              createdAt: firestore.FieldValue.serverTimestamp(),
+              createdAt: serverTimestamp(),
             };
-            await firestore()
-              .collection('users')
-              .doc(firebaseUser.uid)
-              .set(minimalUser);
+
+            // Attempt to save minimal profile, but don't block if it fails
+            try {
+              const userRef = doc(db, 'users', firebaseUser.uid);
+              await setDoc(userRef, minimalUser, { merge: true });
+            } catch (saveError) {
+              console.error('Error saving minimal profile:', saveError);
+            }
+
             setUser(minimalUser as unknown as User);
           }
         } catch (error) {
-          console.error('Error fetching user profile:', error);
-          // Don't sign the user out on network error; keep them logged in
+          console.error('Critical error in useAuth:', error);
+          // Only set to null if we really can't determine the user status
           setUser(null);
         }
       } else {

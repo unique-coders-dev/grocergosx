@@ -7,12 +7,13 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { Text, TextInput, Button, IconButton } from 'react-native-paper';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import auth from '@react-native-firebase/auth';
+import auth, { getAuth, signInWithEmailAndPassword } from '@react-native-firebase/auth';
 import { colors } from '../../config/theme';
 
 const loginSchema = z.object({
@@ -64,9 +65,11 @@ export const LoginScreen = ({ navigation }: any) => {
     setLoading(true);
     setError(null);
     try {
-      await auth().signInWithEmailAndPassword(data.email.trim(), data.password);
+      const firebaseAuth = getAuth();
+      await signInWithEmailAndPassword(firebaseAuth, data.email.trim(), data.password);
     } catch (err: any) {
-      const code = err?.code || '';
+      console.error('Login error detail:', err);
+      const code = err?.code || err?.userInfo?.code || '';
       setError(getFirebaseErrorMessage(code));
     } finally {
       setLoading(false);
@@ -81,6 +84,11 @@ export const LoginScreen = ({ navigation }: any) => {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
+            <Image 
+              source={require('../../assets/logos/logo_full.png')} 
+              style={styles.logo} 
+              resizeMode="contain"
+            />
             <Text variant="displaySmall" style={styles.title}>
               Welcome Back!
             </Text>
@@ -212,8 +220,14 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   header: {
-    marginTop: 40,
-    marginBottom: 40,
+    marginTop: 20,
+    marginBottom: 30,
+    alignItems: 'center',
+  },
+  logo: {
+    height: 60,
+    width: 200,
+    marginBottom: 20,
   },
   title: {
     fontWeight: '700',
