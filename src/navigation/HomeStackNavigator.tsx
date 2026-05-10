@@ -10,6 +10,9 @@ import { LaundryHomeScreen } from '../screens/customer/laundry/LaundryHomeScreen
 import { LaundryScheduleScreen } from '../screens/customer/laundry/LaundryScheduleScreen';
 import { ParcelHomeScreen } from '../screens/customer/parcel/ParcelHomeScreen';
 import { ParcelBookingScreen } from '../screens/customer/parcel/ParcelBookingScreen';
+import { RideHomeScreen } from '../screens/customer/ride/RideHomeScreen';
+import { RideBookingScreen } from '../screens/customer/ride/RideBookingScreen';
+import { RiderDashboardScreen } from '../screens/customer/ride/RiderDashboardScreen';
 import { PreArrivalStockingScreen } from '../screens/customer/services/PreArrivalStockingScreen';
 import { NotificationScreen } from '../screens/customer/notifications/NotificationScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
@@ -29,6 +32,9 @@ export const HomeStackNavigator = () => {
       <Stack.Screen name="LaundrySchedule" component={LaundryScheduleScreen} />
       <Stack.Screen name="ParcelHome" component={ParcelHomeScreen} />
       <Stack.Screen name="ParcelBooking" component={ParcelBookingScreen} />
+      <Stack.Screen name="RideHome" component={RideHomeScreen} />
+      <Stack.Screen name="RideBooking" component={RideBookingScreen} />
+      <Stack.Screen name="RiderDashboard" component={RiderDashboardScreen} />
       <Stack.Screen name="PreArrival" component={PreArrivalStockingScreen} />
       <Stack.Screen name="Notifications" component={NotificationScreen} />
     </Stack.Navigator>

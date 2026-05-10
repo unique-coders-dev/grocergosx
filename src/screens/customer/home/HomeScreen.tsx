@@ -58,6 +58,14 @@ const SERVICES = [
     thumbnail: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=200',
     route: 'ParcelHome' 
   },
+  { 
+    id: 'ride', 
+    title: 'Ride', 
+    icon: 'car-connected', 
+    color: colors.accent, 
+    thumbnail: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=200',
+    route: 'RideHome' 
+  },
 ];
 
 const DUMMY_PRODUCTS = [
@@ -143,6 +151,16 @@ export const HomeScreen = ({ navigation }: any) => {
             address={currentLocation} 
             onAddressPress={handleAddressPress}
           />
+          {/* Rider Mode Toggle (Demo Shortcut) */}
+          <View style={{ paddingHorizontal: 24, marginTop: -10, marginBottom: 20 }}>
+            <TouchableOpacity 
+              style={styles.riderToggle}
+              onPress={() => navigation.navigate('RiderDashboard')}
+            >
+              <MaterialCommunityIcons name="bike-fast" size={20} color={colors.white} />
+              <Text style={styles.riderToggleText}>Switch to Rider Mode</Text>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
         
         <Animated.View entering={FadeInDown.delay(200).duration(600)}>
@@ -172,7 +190,7 @@ export const HomeScreen = ({ navigation }: any) => {
               >
                 <Card 
                   style={styles.serviceCard}
-                  onPress={() => navigation.navigate(service.route)}
+                  onPress={() => navigation.navigate('HomeTab', { screen: service.route })}
                 >
                   <FastImage source={{ uri: service.thumbnail }} style={styles.serviceThumbnail} />
                   <View style={[styles.serviceGradient, { backgroundColor: 'rgba(0,0,0,0.45)' }]}>
@@ -292,22 +310,41 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 120,
   },
+  riderToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.dark,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    alignSelf: 'flex-start',
+    ...shadows.soft,
+  },
+  riderToggleText: {
+    color: colors.white,
+    fontSize: 13,
+    fontWeight: '700',
+    marginLeft: 8,
+  },
   servicesSection: {
     marginTop: 24,
   },
   servicesRow: {
     paddingHorizontal: 24,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: 12,
   },
   serviceItem: {
-    width: (width - 64) / 3,
+    width: (width - 60) / 2,
+    marginBottom: 4,
   },
   serviceCard: {
     padding: 0,
     height: 120,
     overflow: 'hidden',
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 0,
     ...shadows.soft,
   },

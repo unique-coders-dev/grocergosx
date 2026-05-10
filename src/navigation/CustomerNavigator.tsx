@@ -1,5 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors, shadows } from '../config/theme';
@@ -18,39 +19,44 @@ const Tab = createBottomTabNavigator();
 export const CustomerNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName = 'home-variant';
-          if (route.name === 'OrdersTab') iconName = 'shopping-outline';
-          else if (route.name === 'ServicesTab') iconName = 'apps';
-          else if (route.name === 'ProfileTab') iconName = 'account-outline';
-          
-          if (focused) {
-            iconName = iconName.replace('-outline', '');
-            if (iconName === 'home-variant') iconName = 'home-variant';
-            if (iconName === 'apps') iconName = 'apps';
-          }
+      screenOptions={({ route }) => {
+        const routeName = getFocusedRouteNameFromRoute(route);
+        const hideOnScreens = ['RideHome', 'RideBooking', 'RiderDashboard', 'ParcelBooking', 'LaundrySchedule', 'Checkout', 'ProductDetail'];
+        const isHidden = hideOnScreens.includes(routeName as string);
 
-          return <MaterialCommunityIcons name={iconName} size={28} color={color} />;
-        },
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: colors.dark,
-        tabBarInactiveTintColor: colors.grayLight,
-        tabBarStyle: {
-          height: 80,
-          paddingTop: 10,
-          borderTopWidth: 0,
-          backgroundColor: 'white',
-          ...shadows.premium,
-          borderTopLeftRadius: 32,
-          borderTopRightRadius: 32,
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-        },
-        headerShown: false,
-      })}
+        return {
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName = 'home-variant';
+            if (route.name === 'OrdersTab') iconName = 'shopping-outline';
+            else if (route.name === 'ServicesTab') iconName = 'apps';
+            else if (route.name === 'ProfileTab') iconName = 'account-outline';
+            
+            if (focused) {
+              iconName = iconName.replace('-outline', '');
+            }
+
+            return <MaterialCommunityIcons name={iconName} size={28} color={color} />;
+          },
+          tabBarShowLabel: false,
+          tabBarActiveTintColor: colors.dark,
+          tabBarInactiveTintColor: colors.grayLight,
+          tabBarStyle: {
+            height: isHidden ? 0 : 80,
+            display: isHidden ? 'none' : 'flex',
+            paddingTop: 10,
+            borderTopWidth: 0,
+            backgroundColor: 'white',
+            ...shadows.premium,
+            borderTopLeftRadius: 32,
+            borderTopRightRadius: 32,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+          },
+          headerShown: false,
+        };
+      }}
     >
       <Tab.Screen 
         name="HomeTab" 

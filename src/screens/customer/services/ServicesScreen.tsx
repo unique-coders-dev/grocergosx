@@ -49,6 +49,17 @@ const ALL_SERVICES = [
     image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=800',
     route: 'ParcelHome',
     tag: 'Reliable'
+  },
+  {
+    id: 'ride',
+    title: 'Ride Booking',
+    subtitle: 'Premium Transportation',
+    description: 'Book a ride instantly or schedule for later. Professional drivers available island-wide with real-time tracking.',
+    icon: 'car-connected',
+    color: colors.accent,
+    image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=800',
+    route: 'RideHome',
+    tag: 'Instant'
   }
 ];
 
@@ -73,7 +84,7 @@ export const ServicesScreen = ({ navigation }: any) => {
           >
             <Card 
               style={styles.serviceCard}
-              onPress={() => navigation.navigate(service.route)}
+              onPress={() => navigation.navigate('HomeTab', { screen: service.route })}
             >
               <FastImage source={{ uri: service.image }} style={styles.cardImage} />
               <View style={styles.fullOverlay}>

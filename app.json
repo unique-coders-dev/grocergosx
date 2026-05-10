@@ -16,14 +16,22 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.grocergosx.app"
+      "bundleIdentifier": "com.grocergosx.app",
+      "config": {
+        "googleMapsApiKey": "AIzaSyA7E8jLT2B_hUh1TwZstcef9kcrUQ2xGpY"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#EB1414"
       },
-      "package": "com.grocergosx.app"
+      "package": "com.grocergosx.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyA7E8jLT2B_hUh1TwZstcef9kcrUQ2xGpY"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
